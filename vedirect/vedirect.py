@@ -65,6 +65,13 @@ DEVICE_STATES: Dict[int, str] = {
 }
 DEVICE_STATES_REV: Dict[str, int] = {v: k for k, v in DEVICE_STATES.items()}
 
+DEVICE_MODE_VALUES: Dict[int, str] = {
+    0: "Charger OFF",
+    1: "Charger ON",
+    4: "Charger OFF"
+}
+DEVICE_MODE_VALUES_REV: Dict[str, int] = {v: k for k, v in DEVICE_MODE_VALUES.items()}
+
 # Device States for Remote Control (Page 25, for 0x200C)
 DEVICE_STATES_LINK: Dict[int, str] = {
     0: "Not charging (Off)",
@@ -218,6 +225,11 @@ class VeDirectDev:
         'DEVICE_STATE': {
             'id': 0x0201,
             'parser': EnumAdapter(Int8ul, DEVICE_STATES, DEVICE_STATES_REV, "Unknown State"),
+            'scale': 1
+        },
+        'DEVICE_MODE_VALUES': {
+            'id': 0x0200,
+            'parser': EnumAdapter(Int8ul, DEVICE_MODE_VALUES, DEVICE_MODE_VALUES_REV, "Unknown State"),
             'scale': 1
         },
         'DEVICE_STATE_LINK': {
@@ -413,8 +425,6 @@ class VeDirectDev:
         data_to_check: bytes = command_byte + payload
         checksum: int = self._calculate_checksum(data_to_check)
         
-        # Per Page 3/27, the command is a *single hex nibble*
-        # e.g., Ping (0x01) -> '1'. Get (0x07) -> '7'.
         cmd_char: bytes = b"%1X" % command_byte[0]
 
         if payload:
@@ -422,10 +432,8 @@ class VeDirectDev:
         else:
             payload_hex: bytes = b""
             
-        # Checksum is a full byte (two hex chars)
         checksum_hex: bytes = b"%02X" % checksum
         
-        # Add start and end markers
         return b':' + cmd_char + payload_hex + checksum_hex + b'\n'
 
     def _parse_frame(self, frame_ascii: bytes) -> bytes:
@@ -444,16 +452,12 @@ class VeDirectDev:
         if not frame_ascii.startswith(b':') or not frame_ascii.endswith(b'\n'):
             raise ValueError("Invalid frame: missing start/end markers.")
             
-        # Strip markers
         frame_hex: bytes = frame_ascii.strip(b':\n')
         
-        # The command is one nibble (1 char), the rest is hex bytes (2 chars)
-        # So the total length must be odd.
         if len(frame_hex) % 2 == 0:
             raise ValueError(f"Invalid frame: Not valid HEX. Even-length string. Got: {frame_hex.decode()}")
 
         try:
-            # Pad the odd-length string with a leading '0' to make it even
             frame_hex_padded = b'0' + frame_hex
             
             binary_data: bytes = binascii.unhexlify(frame_hex_padded)
@@ -461,18 +465,18 @@ class VeDirectDev:
         except (binascii.Error, ValueError) as e:
             raise ValueError(f"Invalid frame: Not valid HEX. {e}")
             
-        if len(binary_data) < 1: # Must have at least command
+        if len(binary_data) < 1: 
             raise ValueError("Invalid frame: too short.")
             
-        data_part: bytes = binary_data[:-1] # Everything except the last byte
-        checksum_part: int = binary_data[-1] # The last byte
+        data_part: bytes = binary_data[:-1] 
+        checksum_part: int = binary_data[-1] 
         
         # (sum(data_part) + checksum_part) % 256 must == 0x55
         expected_sum: int = (sum(data_part) + checksum_part) % 256
         if expected_sum != 0x55:
             raise ValueError(f"Checksum mismatch! Expected 0x55, got 0x{expected_sum:02X}")
             
-        return data_part # Return the binary (command + payload)
+        return data_part 
 
     def _send_and_receive(self, command_byte: bytes, payload: bytes = b"") -> Any:
         """
@@ -668,8 +672,8 @@ class VeDirectDev:
     
 
 if __name__=="__main__":
-    mppt = VeDirectDev("/dev//ttyAMA0")
+    mppt = VeDirectDev("/dev//ttyAMA0", debug=True)
 
-    print(mppt.get_register('NETWORK_MODE'))
+    print(mppt.get_register('DEVICE_MODE_VALUES'))
     #print(mppt.get_register('DEVICE_STATE'))
     
