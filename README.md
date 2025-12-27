@@ -76,7 +76,9 @@ Below is a table of selected registers supported by the module:
 
 ## Technical Details
 ### Checksum Validation
-The device verifies every frame for consistency. The sum of all binary bytes (command + data + checksum) modulo 256 must equal 
+The device verifies every frame for consistency. The sum of all binary bytes (command + data + checksum) modulo 256 must equal $0x55$
+
+$$\left( \sum_{i=1}^{n} \text{byte}_i + \text{checksum} \right) \bmod 256 = 0x55$$
 
 ### Asynchronous Data
 
