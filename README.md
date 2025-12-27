@@ -3,7 +3,7 @@
 
 ![Victron Energy](https://img.shields.io/badge/Victron-Energy-blue) ![Python Version](https://img.shields.io/badge/python-3.8+-yellow) ![Protocol](https://img.shields.io/badge/Protocol-VE.Direct%20HEX-orange)
 
-A Python script for communicating with **Victron VE.Direct** devices (such as BlueSolar and SmartSolar MPPT charge controllers) using the **HEX** protocol via a UART (serial) connection. This implementation is based on the official documentation: `BlueSolar-HEX-protocol.pdf` (Rev 18).
+A Python script for communicating with **Victron VE.Direct** devices (such as BlueSolar and SmartSolar MPPT charge controllers) using the **HEX** protocol via a UART (serial) connection. This implementation is based on the official documentation: `BlueSolar-HEX-protocol.pdf` (Rev 18). Tested with MPPT 100/50.
 
 ---
 
