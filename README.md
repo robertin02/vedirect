@@ -13,6 +13,7 @@ A Python script for communicating with **Victron VE.Direct** devices (such as Bl
 * [Quick Start](#quick-start)
 * [Supported Registers](#supported-registers)
 * [Technical Details](#technical-details)
+* [Electrical Connection](#electrical-connection)
 
 ---
 
@@ -89,3 +90,22 @@ $$\left( \sum_{i=1}^{n} \text{byte}_i + \text{checksum} \right) \bmod 256 = 0x55
 
 > [!WARNING]
 > Writing incorrect values to registers (e.g., BATTERY_VOLTAGE_SETTING) can permanently damage your batteries. Always verify the manufacturer's allowed ranges before sending a command.
+
+## Electrical Connection
+
+Image below shows electrical serial connection. 
+
+<img width="732" height="267" alt="image" src="https://github.com/user-attachments/assets/e869a5d0-885a-45a9-ac36-5e79fdd92ece" />
+
+Tested with 3.3V UART on Raspberry Pi 5. MPPT 100/50 uses 5V UART therefore there is a need of Logic Level Converter 3,3V/5V. Tested with the cheapest one and works fine.
+
+```
+                                UART
+┌────────────┐              ┌──────────┐                ┌────────────┐
+│          3 │<-----TX ---->│          │<----- RX ----->│ 10         │
+│ Victron  2 │<-----RX ---->│  LOGIC   │<----- TX ----->│ 8   RPI 5  │
+│   DEV    4 │<---- 5V ---->│  Level   │<----- 3.3V---->│ 1   GPIO   │
+│          1 │<--- GND ---->│converter │<----- GND  --->│ 6          │
+│            │              │          │                │            │
+└────────────┘              └──────────┘                └────────────┘
+```
